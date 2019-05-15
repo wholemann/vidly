@@ -3,6 +3,10 @@ const express = require('express');
 const app = express();
 
 app.use(express.json());
+app.use(function(req,res, next) {
+  console.log('Logging...');
+  // next();
+});
 
 const port = process.env.port || 3000;
 app.listen(port, () => console.log(`Listening on port ${port}...`));
