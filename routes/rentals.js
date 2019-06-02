@@ -52,10 +52,6 @@ router.post('/', async (req, res) => {
       dailyRentalRate: movie.dailyRentalRate
     }
   });
-  // rental = await rental.save();
-
-  // movie.numberInStock--;
-  // movie.save();
 
   try {
     new Fawn.Task()

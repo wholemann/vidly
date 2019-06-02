@@ -1,16 +1,22 @@
-const mongoose = require('mongoose');
+const winston = require('winston');
 const express = require('express');
-const genres = require('./routes/genres');
-const customers = require('./routes/customers');
 const app = express();
 
-mongoose.connect('mongodb://localhost;/vidly', { useNewUrlParser: true })
-  .then(() => console.log('Connected to MongoDB...'))
-  .catch(err => console.error('Could not connect to MongoDB...'));
+require('./startup/logging')();
+require('./startup/routes')(app);
+require('./startup/db')();
+require('./startup/config')();
+require('./startup/validation')();
 
-app.use(express.json());
-app.use('/api/genres', genres);
-app.use('/api/customers', customers);
+// process.on('uncaughtException', (ex) => {
+//   winston.error(ex.message);
+//   process.exit(1);
+// });
 
-const port = process.env.port || 3000;
-app.listen(port, () => console.log(`Listening on port ${port}...`));
+// const p = Promise.reject(new Error('Something failed miserably!'));
+// p.then(() => console.log('Done'));
+
+// throw new Error('Something failed duraing startup.');
+
+const port = process.env.PORT || 3000;
+app.listen(port, () => winston.info(`Listening on port ${port}...`));
