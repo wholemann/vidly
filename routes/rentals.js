@@ -1,4 +1,6 @@
-const {Rental, validate} = require('../models/rental'); 
+const validateObjectId = require('../middleware/validateObjectId');
+const validate = require('../middleware/validate');
+const {Rental, validateRental} = require('../models/rental'); 
 const {Movie} = require('../models/movie'); 
 const {Customer} = require('../models/customer'); 
 const mongoose = require('mongoose');
@@ -15,23 +17,12 @@ router.use((req, res, next) => {
   next();
 });
 
-router.use('/:id', (req, res, next) => {
-  if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
-    return res.status(404).send('Invalid ID.');
-  }
-
-  next();
-});
-
 router.get('/', async (req, res) => {
   const rentals = await Rental.find().sort('-dateOut');
   res.send(rentals);
 });
 
-router.post('/', async (req, res) => {
-  const { error } = validate(req.body); 
-  if (error) return res.status(400).send(error.details[0].message);
-
+router.post('/', validate(validateRental), async (req, res) => {
   const customer = await Customer.findById(req.body.customerId);
   if (!customer) return res.status(400).send('Invalid customer.');
 
@@ -68,7 +59,7 @@ router.post('/', async (req, res) => {
   }
 });
 
-router.get('/:id', async (req, res) => {
+router.get('/:id', validateObjectId, async (req, res) => {
   const rental = await Rental.findById(req.params.id);
 
   if (!rental) return res.status(404).send('The rental with the given ID was not found.');

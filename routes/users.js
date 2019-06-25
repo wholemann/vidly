@@ -1,10 +1,8 @@
+const validate = require('../middleware/validate');
 const auth = require('../middleware/auth');
-const jwt = require('jsonwebtoken');
-const config = require('config');
 const bcrypt = require('bcrypt');
 const _ = require('lodash');
-const { User, validate } = require('../models/user');
-const mongoose = require('mongoose');
+const { User, validateUser } = require('../models/user');
 const express = require('express');
 const router = express.Router();
 
@@ -15,23 +13,12 @@ router.use((req, res, next) => {
   next();
 });
 
-// router.use('/:id', (req, res, next) => {
-//   if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
-//     return res.status(404).send('Invalid ID.');
-//   }
-
-//   next();
-// });
-
 router.get('/me', auth, async (req, res) => {
   const user = await User.findById(req.user._id).select('-password');
   res.send(user);
 });
 
-router.post('/', async (req, res) => {
-  const { error } = validate(req.body);
-  if (error) return res.status(400).send(error.details[0].message);
-
+router.post('/', validate(validateUser), async (req, res) => {
   let user = await User.findOne({ email: req.body.email }); 
   if (user) {
     return res.status(400).send('User already registered.');
